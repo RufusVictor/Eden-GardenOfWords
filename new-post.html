@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Post - Eden</title>
+    <!-- Quill.js CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <!-- Apple Touch Icon (for iOS) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon_io/apple-touch-icon.png">
+    <!-- Android/Chrome Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon_io/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon_io/android-chrome-512x512.png">
+    <!-- Standard Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon_io/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon_io/favicon-32x32.png">
+    <link rel="icon" href="assets/favicon_io/favicon.ico" type="image/x-icon">
+
+</head>
+
+<style>
+    .hero {
+        padding: 40px 20px 0px 20px;
+    }
+
+    .container {
+        margin: 0px auto;
+        margin-top: 20px;
+    }
+
+    .form-container {
+        margin: 0px auto;
+        margin-top: 20px;
+    }
+</style>
+
+<body>
+    <canvas id="fallingPetalsCanvas"></canvas>
+    <canvas id="cursorTrailCanvas"></canvas>
+    <div class="background-overlay"></div>
+    <nav class="navbar">
+        <span class="logo">
+            <a href="index.html">
+                <img src="assets/images/EdenLogo-highres.webp" alt="Eden Logo">
+            </a>
+        </span>
+        <a class="navbar-title" href="index.html">Garden of Words</a>
+    </nav>
+
+    <header class="hero">
+        <h1>Write a New Post</h1>
+        <p>Share your thoughts and experiences</p>
+    </header>
+    <a href="/Eden/logout" id="logoutLink">Logout</a>
+
+    <main class="container">
+        <div class="form-container">
+            <form id="post-form" action="/Eden/submitPost" method="post">
+                <input type="text" name="title" placeholder="Enter Post Title" required>
+                <!-- Quill Editor -->
+                <div id="editor" class="editor-container"></div>
+                <!-- Hidden input to store HTML content -->
+                <input type="hidden" name="content" id="hidden-content">
+                <button type="submit">Publish</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="assets/js/petals.js" defer></script>
+
+    <!-- Quill.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js" defer></script>
+    <script src="assets/js/initQuill.js" defer></script>
+</body>
+
+</html>

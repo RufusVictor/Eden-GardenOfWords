@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Eden</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <!-- Apple Touch Icon (for iOS) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon_io/apple-touch-icon.png">
+    <!-- Android/Chrome Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon_io/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon_io/android-chrome-512x512.png">
+    <!-- Standard Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon_io/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon_io/favicon-32x32.png">
+    <link rel="icon" href="assets/favicon_io/favicon.ico" type="image/x-icon">
+</head>
+
+<style>
+    body {
+        overflow-y: hidden;
+    }
+</style>
+
+<body>
+    <canvas id="fallingPetalsCanvas"></canvas>
+    <canvas id="cursorTrailCanvas"></canvas>
+
+    <div class="background-overlay"></div>
+
+    <nav class="navbar">
+        <span class="logo">
+            <a href="index.html">
+                <img src="assets/images/EdenLogo-highres.webp" alt="Eden Logo">
+            </a>
+        </span>
+        <span class="navbar-title">Garden of Words</span>
+    </nav>
+
+    <header class="hero">
+        <h1>Welcome Back</h1>
+        <p>Login to continue</p>
+    </header>
+
+    <main class="container">
+        <div class="form-container">
+            <form id="login-form" action="/Eden/login" method="post">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p class="suggestion">New to Eden? <a href="register.html">Register</a></p>
+        </div>
+    </main>
+</body>
+<script src="assets/js/petals.js" defer></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+        const successMessage = params.get("success");
+        const errorMessage = params.get("error");
+
+        if (successMessage) {
+            openModal(successMessage);
+        } else if (errorMessage) {
+            openModal(errorMessage);
+        }
+    });
+
+    function openModal(message) {
+        const modal = document.createElement("div");
+        modal.classList.add("modal");
+        modal.innerHTML = `
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <h2>Message</h2>
+                <textarea readonly class="message-textarea">${message}</textarea>
+                <button id="close-message-modal">Okay</button>
+            </div>
+        </div>
+    `;
+        document.body.appendChild(modal);
+        const closeButton = modal.querySelector("#close-message-modal");
+        const textarea = modal.querySelector(".message-textarea");
+        textarea.focus();
+        closeButton.onclick = () => {
+            modal.remove();
+            window.history.replaceState({}, document.title, window.location.pathname);
+        };
+        textarea.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                closeButton.click();
+            }
+        });
+        const handleEscapeKey = (event) => {
+            if (event.key === "Escape") {
+                modal.remove();
+                document.removeEventListener("keydown", handleEscapeKey);
+            }
+        };
+        document.addEventListener("keydown", handleEscapeKey);
+    }
+
+</script>
+
+</html>
