@@ -60,8 +60,7 @@ To get a local copy of this project up and running, follow these steps:
 
 6. **Start Tomcat**:
 
-- Navigate to the bin directory of your Tomcat installation.
-- Run the Tomcat startup script to launch the server:
+- Navigate to the bin directory of your Tomcat installation and run the Tomcat startup script to launch the server:
 
   ```bash
   ./startup.sh   # For Linux/MacOS
