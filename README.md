@@ -1,4 +1,4 @@
-<img src="https://github.com/RufusVictor/Eden-GardenOfWords/blob/main/assets/images/EdenLogo-highres.webp" width="30%"/>
+<centre><img src="https://github.com/RufusVictor/Eden-GardenOfWords/blob/main/assets/images/EdenLogo-highres.webp" width="30%"/></centre>
 
 # Eden: Garden of Words
 
