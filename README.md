@@ -1,4 +1,4 @@
-![Logo Image](https://github.com/RufusVictor/Eden-GardenOfWords/blob/main/assets/images/EdenLogo-highres.webp)
+<img src="https://github.com/RufusVictor/Eden-GardenOfWords/blob/main/assets/images/EdenLogo-highres.webp" width="30%"/>
 
 # Eden: Garden of Words
 
