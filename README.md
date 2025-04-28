@@ -43,6 +43,39 @@ To get a local copy of this project up and running, follow these steps:
 
 - Create a MySQL database for the project.
 
+3. **Configure Database Connection**:
+
+- Set the correct MySQL connection details (username, password, and database name).
+- You may need to add MySQL JDBC dependencies to your WEB-INF/lib folder if not already included.
+
+4. **Redis Setup**:
+
+- Install Redis by following the official instructions from Redis Documentation.
+- Ensure Redis is running on your local machine.
+
+5. **Build and Deploy to Tomcat**:
+
+- After setting up the project, navigate to the Tomcat webapps directory.
+- Copy the entire Eden-GardenOfWords folder into the webapps folder of your Tomcat installation.
+
+6. **Start Tomcat**:
+
+- Navigate to the bin directory of your Tomcat installation.
+- Run the Tomcat startup script to launch the server:
+
+  ```bash
+  ./startup.sh   # For Linux/MacOS
+  ./startup.bat  # For Windows
+
+7. **Access the Platform**:
+
+- Once Tomcat is running, open your browser and navigate to:
+
+   ```bash
+   http://localhost:8080/Eden-GardenOfWords
+
+- You should now be able to access the platform locally!
+
 ## Acknowledgements
 
 - [Hugging Face](https://huggingface.co/) for the BART model used in AI-based summarization.
