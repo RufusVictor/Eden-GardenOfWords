@@ -39,6 +39,10 @@ To get a local copy of this project up and running, follow these steps:
    ```bash
    git clone https://github.com/RufusVictor/Eden-GardenOfWords.git
 
+2. **Database Setup**:
+
+- Create a MySQL database for the project.
+
 ## Acknowledgements
 
 - [Hugging Face](https://huggingface.co/) for the BART model used in AI-based summarization.
