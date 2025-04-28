@@ -1,3 +1,5 @@
+![Example Image](https://github.com/RufusVictor/Eden-GardenOfWords/blob/main/assets/images/EdenLogo-highres.webp)
+
 # Eden: Garden of Words
 
 Eden: Garden of Words is an interactive web platform designed for creative writing and content sharing. It allows users to register, write, publish, and engage with posts in a visually appealing "garden" theme. The platform provides social features such as commenting, liking, and searching for posts while ensuring high performance and security.
