@@ -1,12 +1,10 @@
-<centre><img src="https://github.com/RufusVictor/Eden-GardenOfWords/blob/main/assets/images/EdenLogo-highres.webp" width="30%"/></centre>
+# 🌷Eden - Garden of Words
 
-# Eden: Garden of Words
-
-Eden: Garden of Words is an interactive web platform designed for creative writing and content sharing. It allows users to register, write, publish, and engage with posts in a visually appealing "garden" theme. The platform provides social features such as commenting, liking, and searching for posts while ensuring high performance and security.
+Eden - Garden of Words is an interactive web platform designed for creative writing and content sharing. It allows users to register, write, publish, and engage with posts in a visually appealing "garden" theme. The platform provides social features such as commenting, liking, and searching for posts while ensuring high performance and security.
 
 ![Platform Screenshot](https://rufusvictor.netlify.app/images/Eden.png)
 
-## Features
+## 🌼 Features
 
 - **User Authentication:** Secure signup and login system with encrypted passwords (bcrypt) and session management for personalized user profiles.
 - **Create & Edit Posts:** Authors can compose, edit, or delete posts with rich-text formatting via a Quill editor.
@@ -19,24 +17,24 @@ Eden: Garden of Words is an interactive web platform designed for creative writi
 - **Security & Rate Limiting:** Built-in security features like input sanitization, password hashing, and per-endpoint rate limiting to prevent abuse.
 - **Developer-Friendly:** Clean, modular code using standard Java servlets, MySQL, Redis, and SLF4J logging. Easily extendable for developers.
 
-## Technologies Used
+## 🌿 Technologies Used
 
 - **Backend:** Java Servlets, Tomcat 10.1, HikariCP, MySQL, Redis, SLF4J
 - **Frontend:** HTML, CSS, JavaScript, Quill editor
 - **Authentication:** Bcrypt password hashing, session-based management
 - **AI Summarization:** Hugging Face’s BART
 
-## Getting Started
+## 🌱 Getting Started
 
 To get a local copy of this project up and running, follow these steps:
 
-### Prerequisites
+### 🦋 Prerequisites
 
 - **Apache Tomcat 10.1**: Ensure you have Tomcat 10.1 installed and running. You can download it from [Tomcat's official website](https://tomcat.apache.org/).
 - **MySQL Database**: You will need a MySQL server running and a database setup for the application.
 - **Redis**: Ensure Redis is installed and running for caching AI-generated post summaries.
 
-### Setup Instructions
+### 🪴 Setup Instructions
 
 1. **Clone the repository**:
 
@@ -79,7 +77,7 @@ To get a local copy of this project up and running, follow these steps:
 
 - You should now be able to access the platform locally!
 
-## Acknowledgements
+## 🪽 Acknowledgements
 
 - [Hugging Face](https://huggingface.co/) for the BART model used in AI-based summarization.
 - [HikariCP](https://github.com/brettwooldridge/HikariCP) for connection pooling.
