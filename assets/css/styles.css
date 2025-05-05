@@ -214,6 +214,10 @@ canvas#cursorTrailCanvas {
     list-style-position: inside;
 }
 
+.ql-code-block-container {
+    white-space: pre-wrap;
+}
+
 .post-content .ql-align-center {
     text-align: center;
 }

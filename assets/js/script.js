@@ -97,6 +97,7 @@ let currentPage = 1;
 const pageSize = 10;
 let currentSortOption = "desc";
 let currentQuery = "";
+
 function fetchPosts(page = currentPage, sortOption = currentSortOption) {
     fetch(`/Eden/getPosts?page=${page}&pageSize=${pageSize}&sort=${sortOption}`)
         .then(response => {
@@ -108,12 +109,19 @@ function fetchPosts(page = currentPage, sortOption = currentSortOption) {
             return response.json();
         })
         .then(data => {
+            const totalPages = Math.ceil(data.totalPosts / pageSize);
+            if (page > totalPages) {
+                currentPage = totalPages;
+                updateUrlForPagination(sortOption, currentPage, "");
+                fetchPosts(currentPage, sortOption);
+                return;
+            }
+
             let postsContainer = document.getElementById("posts");
             if (!postsContainer) return;
             postsContainer.innerHTML = "";
-
             if (data.posts.length > 0) {
-                const fragment = document.createDocumentFragment(); // document fragment
+                const fragment = document.createDocumentFragment(); // Document fragment
                 data.posts.forEach(post => {
                     let postDiv = document.querySelector(`.post[data-postid="${post.postId}"]`);
                     if (!postDiv) {
@@ -130,6 +138,7 @@ function fetchPosts(page = currentPage, sortOption = currentSortOption) {
                 const endPost = Math.min(currentPage * pageSize, data.totalPosts);
                 postCountMessage.textContent = `Showing ${startPost}-${endPost} of ${data.totalPosts} total posts`;
             }
+            updateUrlForPagination(sortOption, page, "");
         })
         .catch(error => {
             console.error("Error fetching posts:", error);
@@ -634,18 +643,24 @@ if (searchInput && searchButton) {
             currentPage = 1;
             currentQuery = query;
             fetchPostsBySearch(query, currentSortOption, currentPage);
+            updateUrlForPagination(currentSortOption, currentPage, query);
         } else {
             openModal("Please enter a search term.");
         }
     });
 }
-
 window.addEventListener('load', () => {
+    parseQueryParams();
     updatePostButton();
     updateLogoutButton();
     updateSearchPlaceholder();
     initializeSortingDropdown();
-    fetchPosts(currentPage, currentSortOption);
+
+    if (currentQuery) {
+        fetchPostsBySearch(currentQuery, currentSortOption, currentPage);
+    } else {
+        fetchPosts(currentPage, currentSortOption);
+    }
 });
 
 window.addEventListener('resize', () => {
@@ -696,20 +711,8 @@ function updatePaginationControls(totalPosts, query = "", sortOption = "") {
             currentPage--;
             if (query) {
                 fetchPostsBySearch(query, sortOption, currentPage);
-                setTimeout(() => {
-                    let navbar = document.querySelector(".navbar");
-                    if (navbar) {
-                        navbar.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }
-                }, 100);
             } else {
                 fetchPosts(currentPage, currentSortOption);
-                setTimeout(() => {
-                    let navbar = document.querySelector(".navbar");
-                    if (navbar) {
-                        navbar.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }
-                }, 100);
             }
         }
     };
@@ -724,25 +727,14 @@ function updatePaginationControls(totalPosts, query = "", sortOption = "") {
             currentPage++;
             if (query) {
                 fetchPostsBySearch(query, sortOption, currentPage);
-                setTimeout(() => {
-                    let navbar = document.querySelector(".navbar");
-                    if (navbar) {
-                        navbar.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }
-                }, 100);
             } else {
                 fetchPosts(currentPage, currentSortOption);
-                setTimeout(() => {
-                    let navbar = document.querySelector(".navbar");
-                    if (navbar) {
-                        navbar.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }
-                }, 100);
             }
         }
     };
     paginationControls.appendChild(nextButton);
 }
+
 function fetchPostsBySearch(query, sortOption, page) {
     fetch(`/Eden/searchPosts?query=${encodeURIComponent(query)}&sort=${sortOption}&page=${page}&pageSize=${pageSize}`)
         .then(response => {
@@ -754,16 +746,23 @@ function fetchPostsBySearch(query, sortOption, page) {
             return response.json();
         })
         .then(data => {
+            const totalPages = Math.ceil(data.totalPosts / pageSize);
+            if (page > totalPages) {
+                currentPage = totalPages;
+                updateUrlForPagination(sortOption, currentPage, query);
+                fetchPostsBySearch(query, sortOption, currentPage);
+                return;
+            }
+
             let postsContainer = document.getElementById("posts");
             if (!postsContainer) return;
-
             postsContainer.innerHTML = "";
             if (data.posts.length > 0) {
-                const fragment = document.createDocumentFragment(); // document fragment
+                const fragment = document.createDocumentFragment();
                 data.posts.forEach(post => {
                     let postDiv = document.querySelector(`.post[data-postid="${post.postId}"]`);
                     if (!postDiv) {
-                        let newPostDiv = createPostElement(post); // Helper function
+                        let newPostDiv = createPostElement(post);
                         fragment.appendChild(newPostDiv);
                     }
                 });
@@ -780,6 +779,7 @@ function fetchPostsBySearch(query, sortOption, page) {
                     postCountMessage.textContent = `Showing ${startPost}-${endPost} of ${data.totalPosts} search results`;
                 }
             }
+            updateUrlForPagination(sortOption, page, query);
         })
         .catch(error => {
             console.error("Error fetching search results:", error);
@@ -787,12 +787,74 @@ function fetchPostsBySearch(query, sortOption, page) {
         });
 }
 
+function updateUrlForPagination(sortOption, page, query) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set("page", page);
+    urlParams.set("sort", sortOption);
+
+    if (query) {
+        urlParams.set("query", query);
+    } else {
+        urlParams.delete("query");
+    }
+
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    history.pushState({ page, sortOption, query }, "", newUrl);
+}
+
+function parseQueryParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let parsedPage = parseInt(urlParams.get("page")) || 1;
+    currentPage = Math.max(1, parsedPage);
+
+    const urlSortOption = urlParams.get("sort");
+    const savedSortOption = getSortingPreference();
+    if (isValidSortOption(urlSortOption)) {
+        currentSortOption = urlSortOption;
+    } else if (isValidSortOption(savedSortOption)) {
+        currentSortOption = savedSortOption;
+        updateUrlForPagination(currentSortOption, currentPage, currentQuery);
+    } else {
+        currentSortOption = "desc";
+        updateUrlForPagination(currentSortOption, currentPage, currentQuery);
+    }
+
+    currentQuery = urlParams.get("query") || "";
+}
+
+window.addEventListener("popstate", (event) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = parseInt(urlParams.get("page")) || 1;
+    const urlSortOption = urlParams.get("sort");
+    const query = urlParams.get("query") || "";
+    const savedSortOption = getSortingPreference();
+    currentPage = page;
+    currentSortOption = isValidSortOption(urlSortOption) ? urlSortOption : savedSortOption || "desc";
+    currentQuery = query;
+    if (query) {
+        fetchPostsBySearch(query, currentSortOption, currentPage);
+    } else {
+        fetchPosts(currentPage, currentSortOption);
+    }
+});
+
+function isValidSortOption(sortOption) {
+    const validOptions = ["asc", "desc", "likes_desc"];
+    return validOptions.includes(sortOption);
+}
+
 function initializeSortingDropdown() {
     const sortDropdown = document.getElementById("sort-by");
     if (!sortDropdown) return;
     const savedSortOption = getSortingPreference();
-    currentSortOption = savedSortOption;
-    sortDropdown.value = savedSortOption;
+    const urlSortOption = new URLSearchParams(window.location.search).get("sort");
+    if (!isValidSortOption(urlSortOption)) {
+        updateUrlForPagination("desc", currentPage, currentQuery);
+        currentSortOption = "desc";
+    } else {
+        currentSortOption = urlSortOption || savedSortOption || "desc";
+    }
+    sortDropdown.value = currentSortOption;
     sortDropdown.addEventListener("change", event => {
         const selectedSortOption = event.target.value;
         saveSortingPreference(selectedSortOption);
@@ -803,6 +865,7 @@ function initializeSortingDropdown() {
         } else {
             fetchPosts(currentPage, selectedSortOption);
         }
+        updateUrlForPagination(selectedSortOption, currentPage, currentQuery);
     });
 }
 
@@ -816,11 +879,9 @@ function getSortingPreference() {
 
 // Edit Post Window
 function openEditModal(post, postId) {
-    // Create the modal container
     const modal = document.createElement("div");
     modal.classList.add("modal");
 
-    // Add the modal structure to the main DOM
     modal.innerHTML = `
         <div class="modal-overlay">
             <div class="modal-content form-container">
@@ -953,7 +1014,7 @@ function openEditModal(post, postId) {
                 [{ color: [] }, { background: [] }],
                 [{ align: [] }],
                 [{ list: "ordered" }],
-                ["link"],
+                ['link', 'code-block'],
                 ["clean"]
             ]
         }
