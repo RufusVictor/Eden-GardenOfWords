@@ -98,7 +98,7 @@ const pageSize = 10;
 let currentSortOption = "desc";
 let currentQuery = "";
 
-function fetchPosts(page = currentPage, sortOption = currentSortOption) {
+function fetchPosts(page = currentPage, sortOption = currentSortOption, isUserInitiated = true) {
     fetch(`/Eden/getPosts?page=${page}&pageSize=${pageSize}&sort=${sortOption}`)
         .then(response => {
             if (response.status === 429) {
@@ -112,11 +112,18 @@ function fetchPosts(page = currentPage, sortOption = currentSortOption) {
             const totalPages = Math.ceil(data.totalPosts / pageSize);
             if (page > totalPages) {
                 currentPage = totalPages;
-                updateUrlForPagination(sortOption, currentPage, "");
-                fetchPosts(currentPage, sortOption);
+                updateUrlForPagination(currentSortOption, currentPage, currentQuery, isUserInitiated);
+                fetchPosts(currentPage, currentSortOption, isUserInitiated);
                 return;
             }
-
+            const paginationControls = document.getElementById("pagination-controls");
+            if (paginationControls) {
+                paginationControls.style.display = "";
+            }
+            const sortDropdown = document.getElementById("sort-by");
+            if (sortDropdown) {
+                sortDropdown.disabled = false;
+            }
             let postsContainer = document.getElementById("posts");
             if (!postsContainer) return;
             postsContainer.innerHTML = "";
@@ -138,7 +145,9 @@ function fetchPosts(page = currentPage, sortOption = currentSortOption) {
                 const endPost = Math.min(currentPage * pageSize, data.totalPosts);
                 postCountMessage.textContent = `Showing ${startPost}-${endPost} of ${data.totalPosts} total posts`;
             }
-            updateUrlForPagination(sortOption, page, "");
+            if (isUserInitiated) {
+                updateUrlForPagination(currentSortOption, currentPage, currentQuery);
+            }
         })
         .catch(error => {
             console.error("Error fetching posts:", error);
@@ -625,8 +634,10 @@ if (searchInput && searchButton) {
                 currentQuery = query;
                 fetchPostsBySearch(query, currentSortOption, currentPage);
             } else {
+                currentPage = 1;
                 currentQuery = "";
                 fetchPosts(currentPage, currentSortOption);
+                updateUrlForPagination(currentSortOption, currentPage, "");
             }
         }, 300);
     });
@@ -643,7 +654,6 @@ if (searchInput && searchButton) {
             currentPage = 1;
             currentQuery = query;
             fetchPostsBySearch(query, currentSortOption, currentPage);
-            updateUrlForPagination(currentSortOption, currentPage, query);
         } else {
             openModal("Please enter a search term.");
         }
@@ -656,10 +666,16 @@ window.addEventListener('load', () => {
     updateSearchPlaceholder();
     initializeSortingDropdown();
 
+    history.replaceState(
+        { page: currentPage, sortOption: currentSortOption, query: currentQuery },
+        "",
+        window.location.href
+    );
+
     if (currentQuery) {
-        fetchPostsBySearch(currentQuery, currentSortOption, currentPage);
+        fetchPostsBySearch(currentQuery, currentSortOption, currentPage, false);
     } else {
-        fetchPosts(currentPage, currentSortOption);
+        fetchPosts(currentPage, currentSortOption, false);
     }
 });
 
@@ -710,10 +726,16 @@ function updatePaginationControls(totalPosts, query = "", sortOption = "") {
         if (currentPage > 1) {
             currentPage--;
             if (query) {
-                fetchPostsBySearch(query, sortOption, currentPage);
+                fetchPostsBySearch(query, sortOption, currentPage, true);
             } else {
-                fetchPosts(currentPage, currentSortOption);
+                fetchPosts(currentPage, currentSortOption, true);
             }
+            setTimeout(() => {
+                let navbar = document.querySelector(".navbar");
+                if (navbar) {
+                    navbar.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }, 100);
         }
     };
     paginationControls.appendChild(prevButton);
@@ -726,34 +748,72 @@ function updatePaginationControls(totalPosts, query = "", sortOption = "") {
         if (currentPage < totalPages) {
             currentPage++;
             if (query) {
-                fetchPostsBySearch(query, sortOption, currentPage);
+                fetchPostsBySearch(query, sortOption, currentPage, true);
             } else {
-                fetchPosts(currentPage, currentSortOption);
+                fetchPosts(currentPage, currentSortOption, true);
             }
+            setTimeout(() => {
+                let navbar = document.querySelector(".navbar");
+                if (navbar) {
+                    navbar.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }, 100);
         }
     };
     paginationControls.appendChild(nextButton);
 }
 
-function fetchPostsBySearch(query, sortOption, page) {
+function updateUIForEmptyResults() {
+    const postsContainer = document.getElementById("posts");
+    if (postsContainer) {
+        postsContainer.innerHTML = "";
+    }
+    const postCountMessage = document.getElementById("post-count-message");
+    if (postCountMessage) {
+        postCountMessage.textContent = "No search results found.";
+    }
+    const paginationControls = document.getElementById("pagination-controls");
+    if (paginationControls) {
+        paginationControls.style.display = "none";
+    }
+    const sortDropdown = document.getElementById("sort-by");
+    if (sortDropdown) {
+        sortDropdown.disabled = true;
+    }
+}
+
+function fetchPostsBySearch(query, sortOption = currentSortOption, page = currentPage, isUserInitiated = true) {
     fetch(`/Eden/searchPosts?query=${encodeURIComponent(query)}&sort=${sortOption}&page=${page}&pageSize=${pageSize}`)
         .then(response => {
             if (response.status === 429) {
                 window.location.href = "code429.html";
             } else if (!response.ok) {
-                throw new Error("Failed to fetch post details.");
+                throw new Error("Failed to fetch search results.");
             }
             return response.json();
         })
         .then(data => {
             const totalPages = Math.ceil(data.totalPosts / pageSize);
-            if (page > totalPages) {
-                currentPage = totalPages;
-                updateUrlForPagination(sortOption, currentPage, query);
-                fetchPostsBySearch(query, sortOption, currentPage);
+            if (data.totalPosts === 0) {
+                currentPage = 1;
+                updateUrlForPagination(sortOption, currentPage, query, isUserInitiated);
+                updateUIForEmptyResults();
                 return;
             }
-
+            if (page > totalPages) {
+                currentPage = totalPages;
+                updateUrlForPagination(sortOption, currentPage, query, isUserInitiated);
+                fetchPostsBySearch(query, sortOption, currentPage, false);
+                return;
+            }
+            const paginationControls = document.getElementById("pagination-controls");
+            if (paginationControls) {
+                paginationControls.style.display = "";
+            }
+            const sortDropdown = document.getElementById("sort-by");
+            if (sortDropdown) {
+                sortDropdown.disabled = false;
+            }
             let postsContainer = document.getElementById("posts");
             if (!postsContainer) return;
             postsContainer.innerHTML = "";
@@ -779,7 +839,9 @@ function fetchPostsBySearch(query, sortOption, page) {
                     postCountMessage.textContent = `Showing ${startPost}-${endPost} of ${data.totalPosts} search results`;
                 }
             }
-            updateUrlForPagination(sortOption, page, query);
+            if (isUserInitiated) {
+                updateUrlForPagination(sortOption, currentPage, query);
+            }
         })
         .catch(error => {
             console.error("Error fetching search results:", error);
@@ -787,7 +849,9 @@ function fetchPostsBySearch(query, sortOption, page) {
         });
 }
 
-function updateUrlForPagination(sortOption, page, query) {
+let isNavigatingViaPopstate = false;
+
+function updateUrlForPagination(sortOption, page, query, isUserInitiated = true) {
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.set("page", page);
     urlParams.set("sort", sortOption);
@@ -799,7 +863,12 @@ function updateUrlForPagination(sortOption, page, query) {
     }
 
     const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-    history.pushState({ page, sortOption, query }, "", newUrl);
+
+    if (isUserInitiated) {
+        history.pushState({ page, sortOption, query }, "", newUrl);
+    } else {
+        history.replaceState({ page, sortOption, query }, "", newUrl);
+    }
 }
 
 function parseQueryParams() {
@@ -809,33 +878,50 @@ function parseQueryParams() {
 
     const urlSortOption = urlParams.get("sort");
     const savedSortOption = getSortingPreference();
+
     if (isValidSortOption(urlSortOption)) {
         currentSortOption = urlSortOption;
-    } else if (isValidSortOption(savedSortOption)) {
-        currentSortOption = savedSortOption;
-        updateUrlForPagination(currentSortOption, currentPage, currentQuery);
     } else {
-        currentSortOption = "desc";
-        updateUrlForPagination(currentSortOption, currentPage, currentQuery);
+        currentSortOption = isValidSortOption(savedSortOption) ? savedSortOption : "desc";
     }
-
+    updateUrlForPagination(currentSortOption, currentPage, currentQuery, false);
     currentQuery = urlParams.get("query") || "";
 }
 
 window.addEventListener("popstate", (event) => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const page = parseInt(urlParams.get("page")) || 1;
-    const urlSortOption = urlParams.get("sort");
-    const query = urlParams.get("query") || "";
-    const savedSortOption = getSortingPreference();
-    currentPage = page;
-    currentSortOption = isValidSortOption(urlSortOption) ? urlSortOption : savedSortOption || "desc";
-    currentQuery = query;
-    if (query) {
-        fetchPostsBySearch(query, currentSortOption, currentPage);
+    isNavigatingViaPopstate = true;
+    let page, sortOption, query;
+    if (event.state) {
+        page = event.state.page || 1;
+        sortOption = event.state.sortOption || "desc";
+        query = event.state.query || "";
     } else {
-        fetchPosts(currentPage, currentSortOption);
+        const urlParams = new URLSearchParams(window.location.search);
+        page = parseInt(urlParams.get("page")) || 1;
+        sortOption = urlParams.get("sort") || "desc";
+        query = urlParams.get("query") || "";
     }
+
+    currentPage = Math.max(1, page);
+    const savedSortOption = getSortingPreference();
+    currentSortOption = isValidSortOption(sortOption)
+        ? sortOption
+        : isValidSortOption(savedSortOption)
+            ? savedSortOption
+            : "desc";
+    currentQuery = query;
+
+    if (currentQuery) {
+        fetchPostsBySearch(currentQuery, currentSortOption, currentPage, false);
+    } else {
+        fetchPosts(currentPage, currentSortOption, false);
+    }
+
+    const sortDropdown = document.getElementById("sort-by");
+    if (sortDropdown) {
+        sortDropdown.value = currentSortOption;
+    }
+    isNavigatingViaPopstate = false;
 });
 
 function isValidSortOption(sortOption) {
@@ -846,26 +932,32 @@ function isValidSortOption(sortOption) {
 function initializeSortingDropdown() {
     const sortDropdown = document.getElementById("sort-by");
     if (!sortDropdown) return;
+
     const savedSortOption = getSortingPreference();
     const urlSortOption = new URLSearchParams(window.location.search).get("sort");
+
     if (!isValidSortOption(urlSortOption)) {
-        updateUrlForPagination("desc", currentPage, currentQuery);
-        currentSortOption = "desc";
+        currentSortOption = isValidSortOption(savedSortOption) ? savedSortOption : "desc";
+        updateUrlForPagination(currentSortOption, currentPage, currentQuery);
     } else {
-        currentSortOption = urlSortOption || savedSortOption || "desc";
+        currentSortOption = urlSortOption;
     }
+
     sortDropdown.value = currentSortOption;
+
     sortDropdown.addEventListener("change", event => {
         const selectedSortOption = event.target.value;
         saveSortingPreference(selectedSortOption);
         currentSortOption = selectedSortOption;
         currentPage = 1;
+
         if (currentQuery) {
-            fetchPostsBySearch(currentQuery, selectedSortOption, currentPage);
+            fetchPostsBySearch(currentQuery, selectedSortOption, currentPage, false);
         } else {
-            fetchPosts(currentPage, selectedSortOption);
+            fetchPosts(currentPage, selectedSortOption, false);
         }
-        updateUrlForPagination(selectedSortOption, currentPage, currentQuery);
+
+        updateUrlForPagination(selectedSortOption, currentPage, currentQuery, true);
     });
 }
 
@@ -874,7 +966,7 @@ function saveSortingPreference(sortOption) {
 }
 
 function getSortingPreference() {
-    return localStorage.getItem("sortingPreference") || "desc";
+    return localStorage.getItem("sortingPreference") || null;
 }
 
 // Edit Post Window

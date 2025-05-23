@@ -8,7 +8,7 @@ const quill = new Quill('#editor', {
             ['bold', 'italic', 'underline', 'strike'],
             [{ color: [] }, { background: [] }],
             [{ align: [] }], [{ 'list': 'ordered' }],
-            ['link'],
+            ['link','code-block'],
             ['clean']
         ]
     }
