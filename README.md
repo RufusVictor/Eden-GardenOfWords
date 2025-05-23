@@ -55,12 +55,17 @@ To get a local copy of this project up and running, follow these steps:
 - Install Redis by following the official instructions from Redis Documentation.
 - Ensure Redis is running on your local machine.
 
-5. **Build and Deploy to Tomcat**:
+5. **AI Summarizer**:
+
+- Download the AI Text Summarizer using ```AiDownload.py```.
+- Then use ```AiLocalHostInit.py``` to deploy the AI to Localhost but make sure to install all dependencies.
+
+6. **Build and Deploy to Tomcat**:
 
 - After setting up the project, navigate to the Tomcat webapps directory.
 - Copy the entire Eden-GardenOfWords folder into the webapps folder of your Tomcat installation.
 
-6. **Start Tomcat**:
+7. **Start Tomcat**:
 
 - Navigate to the bin directory of your Tomcat installation and run the Tomcat startup script to launch the server:
 
@@ -68,7 +73,7 @@ To get a local copy of this project up and running, follow these steps:
   ./startup.sh   # For Linux/MacOS
   ./startup.bat  # For Windows
 
-7. **Access the Platform**:
+8. **Access the Platform**:
 
 - Once Tomcat is running, open your browser and navigate to:
 
