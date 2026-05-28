@@ -1,6 +1,5 @@
 # 🌷Eden - Garden of Words
 [![Live Demo](https://img.shields.io/badge/View-Live%20Demo-green?style=for-the-badge)](https://garden-of-words.onrender.com)
-
 Eden - Garden of Words is an interactive web platform designed for creative writing and content sharing. It allows users to register, write, publish, and engage with posts in a visually appealing "garden" theme. The platform provides social features such as commenting, liking, and searching for posts while ensuring high performance and security.
 
 ![Platform Screenshot](https://rufusvictor.netlify.app/images/Eden.webp)
